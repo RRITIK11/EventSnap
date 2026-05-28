@@ -78,3 +78,15 @@ export const vector = (name: string, dims: number) =>
 ## What you do NOT do
 - Run migrations against production. You write them; the human deploys them.
 - Touch query code outside `packages/db/`. If a query needs to change, propose the schema change and let the caller adapt.
+
+## Hand-off
+
+After a schema change:
+
+1. **Generate:** `npm run generate --workspace=@repo/db` (needs `DATABASE_URL` env). Review the generated SQL file in `packages/db/migrations/`.
+2. **Hand-edit:** swap `CREATE INDEX` → `CREATE INDEX CONCURRENTLY` on any table likely > 10k rows; append HNSW indexes for new vector columns (see `packages/db/migrations/README.md`).
+3. **Apply locally:** `npm run migrate --workspace=@repo/db` against the docker-compose Postgres. Verify table + indexes with `\dt` and `pg_indexes`.
+4. **Privacy review:** if the change touches `users.face_embedding`, `photo_faces`, `photo_approvals`, or any column the `privacy-auditor` flagged in past reviews → invoke `privacy-auditor`.
+5. **Update docs:** if you added/removed a table or significantly changed a column, update `docs/02-data-model.md`.
+6. **Update tracker:** mark the `PROGRESS.csv` row done with the commit SHA.
+7. **Push:** invoke `secure-push` — migrations occasionally contain test seed data with PII.

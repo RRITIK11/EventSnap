@@ -1,0 +1,43 @@
+phase,task,description,status,started,completed,est_hours,actual_hours,blocker,notes
+1,Scaffold monorepo,Create apps/web Next.js 15 PWA, apps/worker Python+FastAPI+RQ, packages/db with Drizzle,done,2026-05-28,2026-05-28,4,3,,Commit 2f398e4
+1,Create Claude subagents,Five specialist agents (face-pipeline-expert, privacy-auditor, db-schema-architect, upload-pipeline-engineer, secure-push),done,2026-05-28,2026-05-28,2,2,,Commit 2f398e4
+1,Write PLAN.md and CLAUDE.md,12-week phased plan and Claude Code project context file,done,2026-05-28,2026-05-28,2,2,,Commits 2f398e4 + 036f967
+1,Docker compose for local infra,Postgres 16 + pgvector + Redis 7 with healthchecks,done,2026-05-28,2026-05-28,1,1,,Commit 6a321d5
+1,First Drizzle migration,9 tables + 2 HNSW indexes (users.face_embedding, photo_faces.embedding) + vector extension,done,2026-05-28,2026-05-28,3,2,,Commit 6a321d5
+1,Auth.js v5 wiring,Credentials provider (email+password with bcrypt cost 12) plus Google placeholder; JWT sessions; Drizzle adapter for accounts/verification_tokens,done,2026-05-28,2026-05-28,4,4,,Commit 6a321d5
+1,Sign-up / sign-in / dashboard UI,Three pages plus middleware that gates /dashboard; consent captured on signup,done,2026-05-28,2026-05-28,3,3,,Commit 6a321d5
+1,Add project-tutor agent and docs,Tutor agent plus docs/ folder with glossary architecture and ADRs plus PROGRESS.csv,done,2026-05-28,2026-05-28,2,2,,this commit
+1,Verify dev server boots,curl /api/health /sign-in /sign-up /dashboard; all green,done,2026-05-28,2026-05-28,1,1,,Manual test in this session
+1,Verify Phase 1 in browser,User sign-up flow end-to-end on http://localhost:3000,in-progress,2026-05-28,,1,,,User to test
+2,MSG91 phone OTP integration,Custom Auth.js Credentials provider that verifies an OTP code; signup flow for phone-first users,pending,,,8,,,
+2,Selfie capture UI,Mobile camera input plus crop plus client-side face-found check before upload,pending,,,10,,,
+2,Face embedding enrollment endpoint,POST /api/me/selfie hands the image to the Python worker which returns the 512-d embedding,pending,,,8,,Needs Phase 4 worker to be partially live OR a synchronous fallback,
+2,Duplicate face check at signup,Reject new user if embedding distance to existing user is below 0.5 cosine,pending,,,4,,,
+2,Account settings page,Edit name image auto-approve toggle and view consent version,pending,,,4,,,
+2,InsightFace install in worker,Uncomment insightface onnxruntime numpy opencv-python-headless in apps/worker/pyproject.toml and pip install,pending,,,2,,,Roughly 500 MB install
+3,Create event flow,Organizer form: name dates upload policy. Inserts events plus event_members (owner),pending,,,4,,,
+3,Event landing page,Member list owner settings tab member join methods,pending,,,6,,,
+3,QR code join flow,Display QR with qr_token; /join/[token] looks up event creates pending event_members row,pending,,,4,,,
+3,Invite link / code join flow,/join?code=ABC123 path that joins event and redirects,pending,,,3,,,
+3,Organizer pre-add guest list,Bulk add by phone/email; sends invite SMS/email,pending,,,6,,,
+3,Per-event upload policy settings,Settings form: who can upload (owner / photographers / all members / open),pending,,,3,,,
+4,Cloudflare R2 client setup,Configure boto3 (Python) and S3-compatible Node client; pre-signed URL helper,pending,,,4,,,Need R2 account + bucket
+4,Pre-signed upload URL endpoint,POST /api/photos/upload-url returns tus URL + photo_id; checks event role and quota,pending,,,6,,,
+4,Resumable chunked upload (tus),tus-js-client integration; client uploads direct to R2; resumes on connection loss,pending,,,8,,,
+4,Upload completion endpoint,POST /api/photos/[id]/complete strips EXIF generates thumbnail enqueues face job,pending,,,6,,,sharp on Node or pillow in worker
+4,EXIF strip + thumbnail generation,Strip all EXIF (incl GPS) then generate 400px thumbnail; verify with exiftool in test,pending,,,4,,,
+4,Worker face detection job,RQ handler face_detect_and_match(photo_id) downloads from R2 runs InsightFace inserts photo_faces,pending,,,8,,,
+4,Worker kNN matching,For each photo_faces.embedding find nearest users.face_embedding under threshold; insert photo_approvals,pending,,,6,,,
+4,Idempotency on face jobs,ON CONFLICT (photo_id face_index) DO NOTHING; or job-key locks; tested,pending,,,3,,,
+5,My-photos gallery,Paginated infinite-scroll grid; filter by approval status; thumbnail-first rendering,pending,,,10,,,
+5,Approval inbox,List of pending photo_approvals; tap to approve or hide; bulk approve,pending,,,6,,,
+5,Hide-from-everyone action,Sets photos.status='hidden' if uploader-owns or matched-subject-decides; cascade to read paths,pending,,,4,,,
+5,Report photo form,POST /api/photos/[id]/report inserts reports row; emails organizer via Resend,pending,,,3,,,
+6,PWA install prompt,Detect beforeinstallprompt event; offer install banner; iOS instructions modal,pending,,,3,,,
+6,Offline upload queue,Service worker that queues uploads when offline; retries when back online,pending,,,8,,,
+6,Privacy policy + ToS + DPDP consent,Draft and link from sign-up; bump consent_version on changes; backfill migration,pending,,,4,,,Legal review optional but recommended
+6,First real event run,Run an actual event (yours or a friend's) end-to-end; collect issues,pending,,,8,,,The acceptance test for MVP
+followup,Upgrade Next.js to 15.5.18 or 16,Pin currently 15.1.6 has CVE-2025-66478; verify Auth.js v5 + Tailwind compat,pending,,,2,,,Tracked as task 16 in session
+followup,Decide launch market,India vs US/EU vs both; affects DPDP/BIPA/GDPR consent text and OTP provider,pending,,,2,,,
+followup,Decide pricing model,Organizer per-event vs subscription vs freemium,pending,,,3,,,Before Phase 6
+followup,Decide photo retention policy,Default 90 days free / unlimited paid? affects soft-delete cleanup job,pending,,,1,,,Before Phase 5

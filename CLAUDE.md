@@ -83,7 +83,7 @@ These exist because EventSnap handles **biometric data** (face embeddings). DPDP
 
 ## Subagents — when to invoke each
 
-Five live in `.claude/agents/`. Invoke via the Agent tool with `subagent_type` matching the file name (no extension).
+Six live in `.claude/agents/`. Invoke via the Agent tool with `subagent_type` matching the file name (no extension).
 
 | Agent                       | When                                                                              |
 | --------------------------- | --------------------------------------------------------------------------------- |
@@ -92,16 +92,26 @@ Five live in `.claude/agents/`. Invoke via the Agent tool with `subagent_type` m
 | `db-schema-architect`       | Any schema change or migration authoring in `packages/db/`                        |
 | `upload-pipeline-engineer`  | Upload endpoints, pre-signed URLs, EXIF strip, thumbnail gen, R2 work             |
 | `secure-push`               | **Before `git push`** to any remote. Scans for secrets/keys/embedding dumps, then pushes. Refuses on findings. |
+| `project-tutor`             | "Explain X", "why did we choose Y", "where are we", "what's next". Maintains `docs/` and `PROGRESS.csv`. **Never writes production code.** |
 
-`privacy-auditor` is read-only — it reviews, the human applies fixes. The others can edit code.
+`privacy-auditor` is read-only — it reviews, the human applies fixes. `project-tutor` is teaching-and-tracking only. The other four can edit code.
+
+Each agent file ends with a **Hand-off** section: what to test after a change, which other agent should review next, what doc/tracker updates are required. Read those — they exist so this crew runs as a system, not a bag of independent tools.
 
 ## Where to find more context
 
 - `PLAN.md` — 12-week phased build plan with the deferred-to-v2 list and rationale.
+- `PROGRESS.csv` — live task tracker across all 6 phases (opens in Excel). Update when a row's status changes; reference commit SHAs in `notes`.
+- `docs/` — explanatory writeups maintained by the `project-tutor` agent:
+  - `docs/00-glossary.md` — every piece of jargon defined.
+  - `docs/01-architecture.md` — current system diagram + file map.
+  - `docs/decisions/` — ADRs for major architectural calls (why InsightFace, why batch, why PWA, etc.).
 - `apps/worker/README.md` — worker-specific dev setup, model installation notes.
 - `packages/db/migrations/README.md` — how to hand-edit migrations correctly.
-- `packages/db/src/schema.ts` — the canonical data model (7 tables).
+- `packages/db/src/schema.ts` — the canonical data model (9 tables).
 - `.claude/agents/*.md` — each subagent's system prompt; useful even when not invoking the agent (they document the rules).
+
+**If you're new to this codebase**, ask the `project-tutor` agent. It exists for exactly that.
 
 ## Decisions still open
 

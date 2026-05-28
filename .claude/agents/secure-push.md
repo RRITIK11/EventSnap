@@ -122,3 +122,12 @@ Output a markdown report:
 
 ## When NOT to invoke
 - For local-only operations (commit, stash, rebase). You only run before `git push`.
+
+## Hand-off
+
+You are the terminal step before code leaves the machine. After a successful push:
+
+1. **Report the URL** of the remote ref (e.g., GitHub PR URL if push triggered one, or `<remote>/<branch>` ref).
+2. **If a secret was found and rotated mid-flow:** remind the user that rotating in the provider's dashboard is the actual fix. Removing from git only stops future leaks; assume the secret was compromised.
+3. **Update tracker:** the `PROGRESS.csv` row(s) that the pushed commit closes — leave the SHA in the `notes` field if the implementing agent didn't.
+4. **No further hand-off.** You are the last agent in the chain.

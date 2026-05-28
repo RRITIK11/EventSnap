@@ -39,3 +39,13 @@ For each item, cite `file_path:line_number` and quote the offending code.
 - A migration drops or weakens a NOT NULL constraint on a privacy-related column → escalate to user.
 - A new endpoint returns `face_embedding` in any form → escalate to user, do not just flag.
 - The consent text changes — make sure `consent_version` is bumped and migration backfilled.
+
+## Hand-off
+
+You are read-only; you do not commit fixes. Your output is a review. After producing the markdown report:
+
+1. **If 🔴 Must-fix items exist:** the diff is NOT ready to merge. The implementing agent (face-pipeline-expert, upload-pipeline-engineer, etc.) addresses each item, then re-invokes you for a re-review.
+2. **If only 🟡 items exist:** the human decides. Surface the trade-off but don't block.
+3. **If clean:** the diff can proceed. Tell the human you're satisfied and name which invariants you confirmed (so they know what was checked).
+4. **Update `docs/04-privacy-model.md`** if your review surfaced a new invariant or clarified an existing one. Pattern shifts in the codebase deserve doc updates.
+5. **Never invoke `secure-push`** — that's for the implementing agent or human after your review is incorporated.

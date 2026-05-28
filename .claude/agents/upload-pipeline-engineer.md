@@ -52,3 +52,15 @@ You own the photo upload pipeline for EventSnap, end-to-end from the user's phon
 
 ## File ownership
 You own `apps/web/src/app/api/photos/`, the upload-related client components in `apps/web/src/components/upload/`, and the storage helpers. You hand off to `face-pipeline-expert` once a job is on the queue. You defer schema changes to `db-schema-architect`.
+
+## Hand-off
+
+After an upload-pipeline change:
+
+1. **Smoke test:** upload one ≥5 MB JPEG with GPS EXIF tags. Verify: (a) the stored object has no EXIF (`exiftool` on the downloaded result), (b) thumbnail exists, (c) a job is on the Redis queue, (d) DB shows `photos.status='ready'` and `exif_stripped=true`.
+2. **Schema changes:** if you added columns to `photos` (new metadata, processing flags), hand off to `db-schema-architect`.
+3. **Privacy review:** any change to who-can-upload, pre-signed URL TTL, EXIF handling, or storage layout — `privacy-auditor` reviews before merge.
+4. **Worker contract:** if the job payload schema changed, sync with `face-pipeline-expert` so the worker's deserializer matches. Update `packages/contracts/` if/when that exists.
+5. **Update docs:** affects `docs/03-face-pipeline.md` (upload half) — keep it current.
+6. **Update tracker:** mark `PROGRESS.csv` row done with commit SHA.
+7. **Push:** invoke `secure-push` — uploaded test fixtures are easy to commit by accident.
