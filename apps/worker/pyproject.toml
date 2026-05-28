@@ -1,0 +1,45 @@
+[project]
+name = "eventsnap-worker"
+version = "0.0.0"
+description = "EventSnap face-recognition worker — detects faces in uploaded photos and matches them to user embeddings."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "rq>=2.0",
+    "redis>=5.2",
+    "psycopg[binary,pool]>=3.2",
+    "pgvector>=0.3",
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+    "python-dotenv>=1.0",
+    "boto3>=1.35",
+    "pillow>=11.0",
+    # Face recognition deps — installed in a follow-up step. Listed here for visibility.
+    # "insightface>=0.7",
+    # "onnxruntime>=1.20",
+    # "numpy>=2.0",
+    # "opencv-python-headless>=4.10",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.8",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/eventsnap_worker"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "SIM"]

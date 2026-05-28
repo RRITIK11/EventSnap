@@ -11,10 +11,15 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Environment files
+# Environment files — NEVER commit. .env.example IS allowed.
 .env
 .env.local
 .env.*.local
+.env.development
+.env.production
+.env.test
+!.env.example
+!.env.*.example
 
 # Build outputs
 dist
@@ -34,3 +39,34 @@ Thumbs.db
 __pycache__/
 *.pyc
 .venv
+
+# Biometric / ML artifacts — must never be committed
+*.npy
+*.npz
+*.pkl
+*.pt
+*.pth
+*.onnx
+.models/
+models/
+weights/
+embeddings/
+face-data/
+
+# Local photo storage / R2 sync
+storage/
+uploads/
+photos-local/
+
+# Database dumps
+*.sql.gz
+*.dump
+*.bak
+
+# Secrets / keys (defence in depth — these should never be near the repo)
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519

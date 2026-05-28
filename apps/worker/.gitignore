@@ -1,0 +1,12 @@
+.venv/
+.models/
+*.onnx
+*.pt
+*.pth
+*.npy
+*.pkl
+__pycache__/
+*.egg-info/
+dist/
+build/
+.env
