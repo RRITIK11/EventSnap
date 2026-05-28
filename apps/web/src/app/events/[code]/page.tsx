@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/auth";
@@ -6,10 +7,13 @@ import {
   getEventByCode,
   getEventMembers,
   getEventMembership,
+  getUploadPolicy,
 } from "@/lib/events";
 
 import { CopyInviteButton } from "./copy-invite-button";
+import { EventQR } from "./event-qr";
 import { LeaveEventButton } from "./leave-event-button";
+import { UploadPolicyForm } from "./upload-policy-form";
 
 function formatRange(startsAt: Date | null, endsAt: Date | null) {
   if (!startsAt && !endsAt) return null;
@@ -52,6 +56,12 @@ export default async function EventDetailPage({
   const members = await getEventMembers(event.id);
   const isOwner = membership.role === "owner";
   const range = formatRange(event.startsAt, event.endsAt);
+  const uploadPolicy = getUploadPolicy(event.uploadPolicy);
+
+  const h = await headers();
+  const host = h.get("host") ?? "localhost:3000";
+  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  const inviteUrl = `${proto}://${host}/join/${event.code}`;
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-2xl flex-col gap-6 px-6 py-12">
@@ -77,10 +87,27 @@ export default async function EventDetailPage({
       <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
         <p className="text-sm font-medium">Invite people</p>
         <p className="mt-1 text-xs text-neutral-400">
-          Share this code or link. Anyone who opens it will be added as a guest.
+          Share the code, link, or QR. Anyone who opens it will be added as a guest.
         </p>
-        <CopyInviteButton code={event.code} />
+        <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start">
+          <div className="shrink-0">
+            <EventQR url={inviteUrl} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <CopyInviteButton code={event.code} />
+          </div>
+        </div>
       </section>
+
+      {isOwner ? (
+        <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
+          <p className="text-sm font-medium">Who can upload photos</p>
+          <p className="mt-1 mb-3 text-xs text-neutral-400">
+            Choose who&apos;s allowed to upload to this event.
+          </p>
+          <UploadPolicyForm eventId={event.id} current={uploadPolicy} />
+        </section>
+      ) : null}
 
       <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
         <p className="text-sm font-medium">

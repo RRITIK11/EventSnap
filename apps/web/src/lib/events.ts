@@ -127,6 +127,44 @@ export async function joinEvent(input: { eventId: string; userId: string }) {
   return membership!;
 }
 
+export const UPLOAD_POLICIES = ["owner", "members", "anyone"] as const;
+export type UploadPolicy = (typeof UPLOAD_POLICIES)[number];
+
+export function getUploadPolicy(uploadPolicyJson: unknown): UploadPolicy {
+  if (
+    uploadPolicyJson &&
+    typeof uploadPolicyJson === "object" &&
+    "who" in uploadPolicyJson &&
+    typeof (uploadPolicyJson as { who: unknown }).who === "string" &&
+    (UPLOAD_POLICIES as readonly string[]).includes((uploadPolicyJson as { who: string }).who)
+  ) {
+    return (uploadPolicyJson as { who: UploadPolicy }).who;
+  }
+  return "members";
+}
+
+export async function updateUploadPolicy(input: {
+  eventId: string;
+  ownerId: string;
+  policy: UploadPolicy;
+}) {
+  const [event] = await db
+    .select({ ownerId: schema.events.ownerId })
+    .from(schema.events)
+    .where(eq(schema.events.id, input.eventId))
+    .limit(1);
+
+  if (!event) throw new Error("Event not found");
+  if (event.ownerId !== input.ownerId) {
+    throw new Error("Only the event owner can change the upload policy");
+  }
+
+  await db
+    .update(schema.events)
+    .set({ uploadPolicy: { who: input.policy } })
+    .where(eq(schema.events.id, input.eventId));
+}
+
 export async function leaveEvent(input: { eventId: string; userId: string }) {
   // Owners can't leave their own event — they'd orphan it. Use a separate "delete event" path.
   const membership = await getEventMembership(input.eventId, input.userId);
