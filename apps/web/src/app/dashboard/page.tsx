@@ -11,19 +11,27 @@ export default async function DashboardPage() {
     <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-6 px-6 py-12">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <form
-          action={async () => {
-            "use server";
-            await signOut({ redirectTo: "/" });
-          }}
-        >
-          <button
-            type="submit"
+        <div className="flex items-center gap-2">
+          <Link
+            href="/settings"
             className="rounded border border-neutral-700 px-3 py-1.5 text-sm hover:bg-neutral-800"
           >
-            Sign out
-          </button>
-        </form>
+            Settings
+          </Link>
+          <form
+            action={async () => {
+              "use server";
+              await signOut({ redirectTo: "/" });
+            }}
+          >
+            <button
+              type="submit"
+              className="rounded border border-neutral-700 px-3 py-1.5 text-sm hover:bg-neutral-800"
+            >
+              Sign out
+            </button>
+          </form>
+        </div>
       </header>
 
       <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
