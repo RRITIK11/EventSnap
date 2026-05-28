@@ -14,7 +14,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-import { vector } from "./vector.js";
+import { vector } from "./vector";
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
@@ -37,7 +37,10 @@ export const users = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     phone: text("phone").unique(),
     email: text("email").unique(),
+    emailVerified: timestamp("email_verified", { withTimezone: true }),
     name: text("name"),
+    image: text("image"),
+    passwordHash: text("password_hash"),
     selfieUrl: text("selfie_url"),
     faceEmbedding: vector("face_embedding", 512),
     autoApprove: boolean("auto_approve").notNull().default(false),
@@ -50,6 +53,43 @@ export const users = pgTable(
     uniqueIndex("users_email_uq").on(t.email),
     // NOTE: HNSW index on face_embedding added by hand in migration SQL.
   ],
+);
+
+// ─── Auth.js (next-auth v5) adapter tables ─────────────────────────────────
+// JWT sessions are used (no sessions table). Accounts links OAuth providers
+// to our users; verification_tokens supports email magic links if we add them.
+
+export const accounts = pgTable(
+  "accounts",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").notNull(),
+    provider: text("provider").notNull(),
+    providerAccountId: text("provider_account_id").notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type"),
+    scope: text("scope"),
+    id_token: text("id_token"),
+    session_state: text("session_state"),
+  },
+  (t) => [
+    primaryKey({ columns: [t.provider, t.providerAccountId] }),
+    index("accounts_user_idx").on(t.userId),
+  ],
+);
+
+export const verificationTokens = pgTable(
+  "verification_tokens",
+  {
+    identifier: text("identifier").notNull(),
+    token: text("token").notNull(),
+    expires: timestamp("expires", { withTimezone: true }).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.identifier, t.token] })],
 );
 
 export const events = pgTable(
