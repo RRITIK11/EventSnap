@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   index,
   integer,
@@ -107,8 +108,8 @@ export const events = pgTable(
     uploadPolicy: jsonb("upload_policy_json")
       .notNull()
       .default(sql`'{"who":"members"}'::jsonb`),
-    storageUsedBytes: integer("storage_used_bytes").notNull().default(0),
-    storageLimitBytes: integer("storage_limit_bytes").notNull().default(5_000_000_000), // 5 GB
+    storageUsedBytes: bigint("storage_used_bytes", { mode: "number" }).notNull().default(0),
+    storageLimitBytes: bigint("storage_limit_bytes", { mode: "number" }).notNull().default(5_000_000_000), // 5 GB
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("events_owner_idx").on(t.ownerId)],
@@ -146,7 +147,7 @@ export const photos = pgTable(
     thumbnailKey: text("thumbnail_key"),
     exifStripped: boolean("exif_stripped").notNull().default(false),
     status: photoStatus("status").notNull().default("pending"),
-    sizeBytes: integer("size_bytes"),
+    sizeBytes: bigint("size_bytes", { mode: "number" }),
     uploadedAt: timestamp("uploaded_at", { withTimezone: true }).notNull().defaultNow(),
     processedAt: timestamp("processed_at", { withTimezone: true }),
   },

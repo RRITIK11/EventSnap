@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useActionState } from "react";
 
 import { signUpAction, type SignUpState } from "./actions";
@@ -8,10 +9,15 @@ import { signUpAction, type SignUpState } from "./actions";
 const initialState: SignUpState = undefined;
 
 export default function SignUpPage() {
+  const params = useSearchParams();
+  const callbackUrl = params.get("callbackUrl") ?? "/dashboard";
+
   const [state, formAction, pending] = useActionState(signUpAction, initialState);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
+      <input type="hidden" name="callbackUrl" value={callbackUrl} />
+
       <h2 className="text-xl font-medium">Create your account</h2>
 
       <p className="text-xs text-neutral-400">
@@ -69,7 +75,13 @@ export default function SignUpPage() {
 
       <p className="text-center text-sm text-neutral-400">
         Already have one?{" "}
-        <Link href="/sign-in" className="underline">
+        <Link
+          href={{
+            pathname: "/sign-in",
+            query: callbackUrl !== "/dashboard" ? { callbackUrl } : undefined,
+          }}
+          className="underline"
+        >
           Sign in
         </Link>
       </p>

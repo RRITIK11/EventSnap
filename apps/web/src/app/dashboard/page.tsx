@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { auth, signOut } from "@/auth";
@@ -32,11 +33,31 @@ export default async function DashboardPage() {
         <p className="mt-3 font-mono text-xs text-neutral-500">user_id: {session.user.id}</p>
       </section>
 
+      <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6">
+        <p className="text-sm font-medium">Events</p>
+        <p className="mt-1 text-xs text-neutral-400">
+          Create an event and share an invite link, or browse the events you&apos;re in.
+        </p>
+        <div className="mt-3 flex gap-2">
+          <Link
+            href="/events"
+            className="rounded bg-white px-3 py-1.5 text-sm font-medium text-neutral-950 hover:bg-neutral-200"
+          >
+            Your events
+          </Link>
+          <Link
+            href="/events/new"
+            className="rounded border border-neutral-700 px-3 py-1.5 text-sm hover:bg-neutral-800"
+          >
+            + New event
+          </Link>
+        </div>
+      </section>
+
       <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 text-sm text-neutral-300">
-        <p className="font-medium text-neutral-100">Phase 1 — Foundation ✓</p>
+        <p className="font-medium text-neutral-100">Phase 1 ✓ &middot; Phase 3 events MVP (in progress)</p>
         <p className="mt-2 text-neutral-400">
-          You&apos;re authenticated. Phase 2 will add phone OTP and the selfie enrollment step that
-          captures your face profile.
+          Coming next: phone OTP (Phase 2) and selfie enrollment (Phase 4 prep).
         </p>
       </section>
     </main>

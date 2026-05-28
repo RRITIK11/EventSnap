@@ -73,8 +73,18 @@ export const authConfig: NextAuthConfig = {
     authorized({ auth, request }) {
       const isLoggedIn = !!auth?.user;
       const path = request.nextUrl.pathname;
-      const isProtected = path.startsWith("/dashboard");
-      if (isProtected && !isLoggedIn) return false;
+      const isProtected =
+        path.startsWith("/dashboard") ||
+        path.startsWith("/events") ||
+        path.startsWith("/join") ||
+        path.startsWith("/settings");
+      if (isProtected && !isLoggedIn) {
+        // Redirect to sign-in (or sign-up for /join) with callbackUrl preserving the target.
+        const target = path.startsWith("/join") ? "/sign-up" : "/sign-in";
+        const url = new URL(target, request.url);
+        url.searchParams.set("callbackUrl", `${path}${request.nextUrl.search}`);
+        return Response.redirect(url);
+      }
       return true;
     },
   },

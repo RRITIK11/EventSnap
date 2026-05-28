@@ -8,6 +8,13 @@
       "when": 1779965759822,
       "tag": "0000_slippery_the_watchers",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779971277101,
+      "tag": "0001_right_electro",
+      "breakpoints": true
     }
   ]
 }

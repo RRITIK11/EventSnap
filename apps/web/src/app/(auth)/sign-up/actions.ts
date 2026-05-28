@@ -12,7 +12,14 @@ const signUpSchema = z.object({
   name: z.string().min(1).max(80),
   email: z.string().email(),
   password: z.string().min(8).max(128),
+  callbackUrl: z.string().default("/dashboard"),
 });
+
+// Only allow internal relative paths as callbackUrls to prevent open-redirects.
+function safeCallback(raw: string): string {
+  if (!raw.startsWith("/") || raw.startsWith("//")) return "/dashboard";
+  return raw;
+}
 
 export type SignUpState = { error?: string } | undefined;
 
@@ -21,13 +28,14 @@ export async function signUpAction(_prev: SignUpState, formData: FormData): Prom
     name: formData.get("name"),
     email: formData.get("email"),
     password: formData.get("password"),
+    callbackUrl: formData.get("callbackUrl") ?? "/dashboard",
   });
 
   if (!parsed.success) {
     return { error: "Check your name, email, and password (≥ 8 chars)." };
   }
 
-  const { name, email, password } = parsed.data;
+  const { name, email, password, callbackUrl } = parsed.data;
 
   const [existing] = await db
     .select({ id: schema.users.id })
@@ -49,7 +57,7 @@ export async function signUpAction(_prev: SignUpState, formData: FormData): Prom
   });
 
   // Sign the new user in immediately. Throws a redirect on success — that's expected.
-  await signIn("credentials", { email, password, redirectTo: "/dashboard" });
+  await signIn("credentials", { email, password, redirectTo: safeCallback(callbackUrl) });
 
   return undefined;
 }
